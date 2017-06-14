@@ -8,15 +8,26 @@ module DoctorTeeth
       xml = File.read(xml) if File.exists?(xml)
       @xml= Nokogiri::XML(xml)
       # TODO validate initial opts
-      @test_run = extract_test_run(opts[:project], opts[:duration], opts[:configuration], opts[:start_time], opts[:execution_id])
+      @test_run = extract_test_run(opts[:project], opts[:configuration], opts[:execution_id])
     end
 
     private
-    def extract_test_run(project, duration, configuration, start_time, execution_id)
-      {
+    def extract_test_run(project, configuration, execution_id)
+      start_time = nil
+      @xml.xpath('//testsuites//properties//property').each do |property|
+        # do not know if this is part of the junit.xml
+        name = property.attributes['name'].value
+        if name == 'timestamp'
+          # BigQuery doesn't like the timezone, providing it in UTC formats it correctly
+          start_time = Time.parse(property.attributes['value'].value).utc
+          break
+        end
+      end
+
+      run = {
           'test_run' => {
               'project'       => project,
-              'duration'      => duration,
+              'duration'      => 0.0, # this is the total duration of all contained test suites
               'configuration' => configuration,
               'start_time'    => start_time,
               'execution_id'  => execution_id,
@@ -24,6 +35,11 @@ module DoctorTeeth
 
           }
       }
+      # calculate duration for test_run
+      run["test_run"]['test_suites'].each do |suite|
+        run["test_run"]['duration'] += suite['duration']
+      end
+      return run
     end
 
     def extract_test_suites
