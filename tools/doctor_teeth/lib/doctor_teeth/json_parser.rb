@@ -12,7 +12,8 @@ module DoctorTeeth
       if File.directory?(file)
         json_files = Dir.entries(file)
         json_files.delete_if{ |file| file.chars.first == '.' }
-        json_files.map!{ |file| File.expand_path(file) }
+        json_files.map!{ |f| File.join(file, f) }
+
       else
         json_files.push(File.expand_path(file))
       end
