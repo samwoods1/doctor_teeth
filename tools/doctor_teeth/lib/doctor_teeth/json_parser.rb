@@ -17,7 +17,12 @@ module DoctorTeeth
         json_files.push(File.expand_path(file))
       end
 
+      file_count = json_files.length
+      puts "Attempting to process #{file_count} json files"
       json_files.each do |json|
+
+        (file_count % 50 == 0) ? output_char = ".\n" : output_char = '.'
+        print output_char
 
         File.open(json).each do |line|
           json_object = JSON.parse(line)
@@ -43,6 +48,8 @@ module DoctorTeeth
           test_record['duration'] = suite_durations.inject(:+)
           insert_record(test_record)
         end
+
+        file_count += -1
       end
     end
 
@@ -103,12 +110,19 @@ module DoctorTeeth
 
     def generate_new_line_delimited_json_file(file)
 
+      line_count = @test_runs.length
+      puts "\nAttempting to write #{line_count} json objects to #{file}"
       File.open(file, 'w') do |f|
 
         @test_runs.each do |k,v|
-          puts "writing test run entry for #{k}"
+
+          (line_count % 50 == 0) ? output_char = ".\n" : output_char = '.'
+          print output_char
+
           f.write(JSON.generate({'test_run' => v}))
           f.write("\n")
+
+          line_count += -1
         end
       end
     end
