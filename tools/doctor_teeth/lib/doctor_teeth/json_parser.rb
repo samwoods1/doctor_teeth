@@ -26,6 +26,8 @@ module DoctorTeeth
         print output_char
 
         File.open(json).each do |line|
+
+          begin
           json_object = JSON.parse(line)
           # translate elasticsearch record to QALEK2 schema
           test_record = {
@@ -48,6 +50,11 @@ module DoctorTeeth
           suite_durations = [json_object['_source']['pre_suite_time'], json_object['_source']['tests_time']].compact
           test_record['duration'] = suite_durations.inject(:+)
           insert_record(test_record)
+
+          rescue Exception => e
+            puts "OHH NO!!!!! Skipping a record \n #{e}"
+
+          end
         end
 
         file_count += -1
