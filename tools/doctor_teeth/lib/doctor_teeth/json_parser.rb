@@ -23,27 +23,41 @@ module DoctorTeeth
       json_files.each do |json|
 
         (file_count % 50 == 0) ? output_char = ".\n" : output_char = '.'
-        print output_char
 
         File.open(json).each do |line|
 
-          begin
+            #TODO fix dirty data
           json_object = JSON.parse(line)
           # translate elasticsearch record to QALEK2 schema
+
+          execution_id = json_object['_source']['jenkins_build_url']
+          project = json_object['_source']['job_name']
+          configuration = []
+          start_time = json_object['_source']['start_time']
+          suite_name = json_object['_source']['test_case_suite']
+          suite_duration = json_object['_source']["#{json_object['_source']['test_case_suite']}_time"]
+          test_name = json_object['_source']['test_case_name']
+          test_status = json_object['_source']['test_case_status']
+          test_duration = json_object['_source']['test_case_time']
+
+          # configuration experiment
+          conf = json_object['_source']['configs']
+          conf.each { |k, v| configuration.push("#{k}=#{v}") } if conf
+
           test_record = {
-              'execution_id'    => json_object['_source']['jenkins_build_url'],
+              'execution_id'    => execution_id,
               #TODO need to find a better way to translate project name
-              'project'         => json_object['_source']['job_name'],
+              'project'         => project,
               #'duration'        => json_object['_source'][],
-              'configuration'   => json_object['_source']['configs'],
-              'start_time'      => Time.parse(json_object['_source']['start_time']).utc,
-              'suite_name'      => json_object['_source']['test_case_suite'],
+              'configuration'   => configuration,
+              'start_time'      => (Time.parse(start_time).utc if start_time),
+              'suite_name'      => suite_name,
 
               # need to look up which suite this is
-              'suite_duration'  => json_object['_source']["#{json_object['_source']['test_case_suite']}_time"],
-              'test_name'       => json_object['_source']['test_case_name'],
-              'test_status'     => json_object['_source']['test_case_status'],
-              'test_duration'   => json_object['_source']['test_case_time'],
+              'suite_duration'  => suite_duration,
+              'test_name'       => test_name,
+              'test_status'     => test_status,
+              'test_duration'   => test_duration,
           }
 
           #add up test_run duration, values could be nil
@@ -51,12 +65,9 @@ module DoctorTeeth
           test_record['duration'] = suite_durations.inject(:+)
           insert_record(test_record)
 
-          rescue Exception => e
-            puts "OHH NO!!!!! Skipping a record \n #{e}"
-
-          end
         end
 
+        print output_char
         file_count += -1
       end
     end
@@ -116,6 +127,7 @@ module DoctorTeeth
       end
     end
 
+    # make a mondo file
     def generate_new_line_delimited_json_file(file)
 
       line_count = @test_runs.length
@@ -131,6 +143,34 @@ module DoctorTeeth
           f.write("\n")
 
           line_count += -1
+        end
+      end
+    end
+
+
+    # for breaking down into smaller files
+    def generate_new_line_delimited_json_files(dir, number_of_desired_files)
+
+      line_count = @test_runs.length
+      puts "\nAttempting to write #{line_count} json objects to files in the directory #{dir}"
+
+
+      slice_count = 0
+      @test_runs.each_slice(@test_runs.length / number_of_desired_files) do |slice|
+        slice_count +=1
+
+        File.open("#{dir}/file#{slice_count.to_s}", 'w') do |f|
+
+          slice.each do |k,v|
+
+            (line_count % 50 == 0) ? output_char = ".\n" : output_char = '.'
+            print output_char
+
+            f.write(JSON.generate({'test_run' => v}))
+            f.write("\n")
+
+            line_count += -1
+          end
         end
       end
     end

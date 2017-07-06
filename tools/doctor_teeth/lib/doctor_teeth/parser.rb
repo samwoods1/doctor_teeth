@@ -24,11 +24,18 @@ module DoctorTeeth
         end
       end
 
+      # update the way that we deal with configuration to match what is done
+      # when we convert elasticsearch data to the BigQuery schema
+      # we are assuming that the configuration is provided in the format of a hash
+
+      conf = []
+      configuration.each { |k,v| conf.push("#{k}=#{v}") }
+
       run = {
           'test_run' => {
               'project'       => project,
               'duration'      => 0.0, # this is the total duration of all contained test suites
-              'configuration' => configuration,
+              'configuration' => conf,
               'start_time'    => start_time,
               'execution_id'  => execution_id,
               'test_suites'   => extract_test_suites
