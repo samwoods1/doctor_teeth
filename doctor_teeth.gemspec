@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.version       = DoctorTeeth::Version::STRING
   s.files         = Dir['CONTRIBUTING.md', 'LICENSE.md', 'MAINTAINERS',
                         'README.md', 'lib/**/*']
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
   #Run time dependencies
   s.add_runtime_dependency 'nokogiri'
