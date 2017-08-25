@@ -1,5 +1,9 @@
 require 'nokogiri'
 module DoctorTeeth
+  # A json file parser that takes extra metadata from a test_suite/case
+  #   metadata that is not always in junit.xml
+  # @since v0.0.1
+  # @attr [String] test_runs holds the extra test_run data
   class NewLineJsonFileParser
 
     attr_accessor :test_runs
@@ -72,7 +76,8 @@ module DoctorTeeth
       end
     end
 
-
+    # inserts a record into something or other. big query?
+    # @since v0.0.1
     def insert_record(test_record={})
       id            = test_record['execution_id']
       project       = test_record['project']

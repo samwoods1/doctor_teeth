@@ -1,5 +1,10 @@
 require 'nokogiri'
 module DoctorTeeth
+  # a Parser type to load and parse xml into test_suites and cases
+  # @todo: uncouple loading from parsing
+  # @todo: uncouple parsing from storing suites/cases?
+  # @since v0.0.1
+  # @attr [String] test_run don't write this. This holds the test_run info from the xml
   class Parser
 
     attr_accessor :test_run
@@ -43,6 +48,7 @@ module DoctorTeeth
           }
       }
       # calculate duration for test_run
+      # @todo: whoa this is probably wrong in some cases
       run["test_run"]['test_suites'].each do |suite|
         run["test_run"]['duration'] += suite['duration']
       end
