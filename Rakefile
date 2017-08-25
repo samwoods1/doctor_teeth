@@ -24,11 +24,14 @@ namespace :docs do
   end
 
   desc 'Tell me about YARD undocummented objects'
-  YARD::Rake::YardocTask.new(:undocumented) do |t|
+  YARD::Rake::YardocTask.new(:undoc) do |t|
     t.stats_options = ['--list-undoc']
   end
 
   desc 'Generate static class/module/method architecture graph. (Calls docs:yard)'
+  # this calls `yard graph` so we can't use the yardoc tasks like above
+  #   We could create a YARD:CLI:Graph object.
+  #   But we still have to send the output to the graphviz processor, etc.  so... :meh:
   task :arch => [:yard] do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
