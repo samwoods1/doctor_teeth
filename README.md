@@ -14,7 +14,7 @@ require 'json'
 
 path = File.join('path', 'to', 'beaker_junit.xml')
 
-# example test run metadata 
+# example test run metadata
 opts = {
         :project        => 'PE-Console UI',
         :duration       => 198347,
