@@ -1,4 +1,6 @@
 require 'yard'
+require 'rubocop/rake_task'
+
 YARD_DIR = 'doc'
 DOCS_DIR = 'docs'
 
@@ -46,6 +48,10 @@ namespace :docs do
     end
     Dir.chdir( original_dir )
   end
+end
+
+namespace :test do
+  RuboCop::RakeTask.new
 end
 
 # Cross-platform exe_exists?
