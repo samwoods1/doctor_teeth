@@ -32,17 +32,18 @@ namespace :docs do
     t.stats_options = ['--list-undoc']
   end
 
-  desc 'Generate static class/module/method architecture graph. (Calls docs:yard)'
+  desc 'Generate static project architecture graph. (Calls docs:yard)'
   # this calls `yard graph` so we can't use the yardoc tasks like above
   #   We could create a YARD:CLI:Graph object.
-  #   But we still have to send the output to the graphviz processor, etc.  so... :meh:
+  #   But we still have to send the output to the graphviz processor, etc.
   task arch: [:yard] do
     original_dir = Dir.pwd
     Dir.chdir(File.expand_path(File.dirname(__FILE__)))
     graph_processor = 'dot'
     if exe_exists?(graph_processor)
       FileUtils.mkdir_p(DOCS_DIR)
-      if system("yard graph --full | #{graph_processor} -Tpng -o #{DOCS_DIR}/arch_graph.png")
+      if system("yard graph --full | #{graph_processor} -Tpng " \
+          "-o #{DOCS_DIR}/arch_graph.png")
         puts "we made you a class diagram: #{DOCS_DIR}/arch_graph.png"
       end
     else
