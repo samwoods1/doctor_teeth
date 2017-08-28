@@ -15,7 +15,7 @@ module DoctorTeeth
 
       if File.directory?(file)
         json_files = Dir.entries(file)
-        json_files.delete_if { |file| file.chars.first == '.' }
+        json_files.delete_if { |f| f.chars.first == '.' }
         json_files.map! { |f| File.join(file, f) }
 
       else
@@ -25,7 +25,7 @@ module DoctorTeeth
       file_count = json_files.length
       puts "Attempting to process #{file_count} json files"
       json_files.each do |json|
-        output_char = file_count % 50 == 0 ? ".\n" : '.'
+        output_char = file_count % 50.zero? ? ".\n" : '.'
 
         File.open(json).each do |line|
           # TODO: fix dirty data
@@ -63,7 +63,8 @@ module DoctorTeeth
           }
 
           # add up test_run duration, values could be nil
-          suite_durations = [json_object['_source']['pre_suite_time'], json_object['_source']['tests_time']].compact
+          suite_durations = [json_object['_source']['pre_suite_time'],
+                             json_object['_source']['tests_time']].compact
           test_record['duration'] = suite_durations.inject(:+)
           insert_record(test_record)
         end
@@ -99,32 +100,29 @@ module DoctorTeeth
       @test_runs[id]['start_time']    ||= start_time
       @test_runs[id]['test_suites']   ||= []
 
-      test_case = { 'name' => test_name, 'duration' => test_duration, 'status' => test_status }
-      test_suite = { 'name' => suite_name, 'duration' => suite_duration, 'test_cases' => [test_case] }
+      test_case = { 'name' => test_name,
+                    'duration' => test_duration, 'status' => test_status }
+      test_suite = { 'name' => suite_name,
+                     'duration' => suite_duration, 'test_cases' => [test_case] }
 
       if @test_runs[id]['test_suites'].empty?
 
         # create the first
         @test_runs[id]['test_suites'].push(test_suite)
-      else
-
-        # does suite exist?
-        if @test_runs[id]['test_suites'].any? { |suite| suite['name'] == suite_name }
-
-          @test_runs[id]['test_suites'].each do |suite|
-            next unless suite['name'] == suite_name
-            # create empty test_cases array if it does not exist
-            suite['test_cases'] ||= []
-            # check if this is a duplicate record (there should not be duplicate records)
-            raise 'CRAP! DUPLICATE RECORD!' if suite['test_cases'].any? { |test| test == test_name }
-            # add test case
-            suite['test_cases'].push(test_case)
-          end
-        else
-
-          # create the suite with test_case inside
-          @test_runs[id]['test_suites'].push(test_suite)
+      # does suite exist?
+      elsif @test_runs[id]['test_suites'].any? { |suite| suite['name'] == suite_name }
+        @test_runs[id]['test_suites'].each do |suite|
+          next unless suite['name'] == suite_name
+          # create empty test_cases array if it does not exist
+          suite['test_cases'] ||= []
+          # check if this is a duplicate record (there should not be duplicate records)
+          raise 'CRAP! DUPLICATE RECORD!' if suite['test_cases'].any? { |test| test == test_name }
+          # add test case
+          suite['test_cases'].push(test_case)
         end
+      else
+        # create the suite with test_case inside
+        @test_runs[id]['test_suites'].push(test_suite)
       end
     end
 
@@ -134,7 +132,7 @@ module DoctorTeeth
       puts "\nAttempting to write #{line_count} json objects to #{file}"
       File.open(file, 'w') do |f|
         @test_runs.each do |_k, v|
-          output_char = line_count % 50 == 0 ? ".\n" : '.'
+          output_char = line_count % 50.zero? ? ".\n" : '.'
           print output_char
 
           f.write(JSON.generate('test_run' => v))
@@ -148,7 +146,8 @@ module DoctorTeeth
     # for breaking down into smaller files
     def generate_new_line_delimited_json_files(dir, number_of_desired_files)
       line_count = @test_runs.length
-      puts "\nAttempting to write #{line_count} json objects to files in the directory #{dir}"
+      puts "\nAttempting to write #{line_count} json objects " \
+        "to files in the directory #{dir}"
 
       slice_count = 0
       @test_runs.each_slice(@test_runs.length / number_of_desired_files) do |slice|
@@ -156,7 +155,7 @@ module DoctorTeeth
 
         File.open("#{dir}/file#{slice_count}", 'w') do |f|
           slice.each do |_k, v|
-            output_char = line_count % 50 == 0 ? ".\n" : '.'
+            output_char = line_count % 50.zero? ? ".\n" : '.'
             print output_char
 
             f.write(JSON.generate('test_run' => v))

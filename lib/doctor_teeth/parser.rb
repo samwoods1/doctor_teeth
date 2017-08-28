@@ -6,7 +6,7 @@ module DoctorTeeth
   # @todo: uncouple loading from parsing
   # @todo: uncouple parsing from storing suites/cases?
   # @since v0.0.1
-  # @attr [String] test_run don't write this. This holds the test_run info from the xml
+  # @attr [String] test_run don't write this. Holds test_run info from the xml
   class Parser
     attr_accessor :test_run
 
@@ -14,7 +14,8 @@ module DoctorTeeth
       xml = File.read(xml) if File.exist?(xml)
       @xml = Nokogiri::XML(xml)
       # TODO: validate initial opts
-      @test_run = extract_test_run(opts[:project], opts[:configuration], opts[:execution_id])
+      @test_run = extract_test_run(opts[:project],
+                                   opts[:configuration], opts[:execution_id])
     end
 
     private
@@ -25,7 +26,8 @@ module DoctorTeeth
         # do not know if this is part of the junit.xml
         name = property.attributes['name'].value
         next unless name == 'timestamp'
-        # BigQuery doesn't like the timezone, providing it in UTC formats it correctly
+        # BigQuery doesn't like the timezone,
+        #   providing it in UTC formats it correctly
         start_time = Time.parse(property.attributes['value'].value).utc
         break
       end
@@ -40,7 +42,7 @@ module DoctorTeeth
       run = {
         'test_run' => {
           'project' => project,
-          'duration'      => 0.0, # this is the total duration of all contained test suites
+          'duration'      => 0.0, # total duration of all contained test suites
           'configuration' => conf,
           'start_time'    => start_time,
           'execution_id'  => execution_id,
@@ -65,7 +67,8 @@ module DoctorTeeth
         duration = suite.attributes['time'].value.to_f
         test_count = suite.attributes['total'].value.to_i
         test_cases = extract_test_cases(suite)
-        test_suites.push('name' => name, 'duration' => duration, 'test_count' => test_count, 'test_cases' => test_cases)
+        test_suites.push('name' => name, 'duration' => duration,
+                         'test_count' => test_count, 'test_cases' => test_cases)
       end
 
       test_suites
@@ -95,7 +98,7 @@ module DoctorTeeth
         if %w[failure error].any? { |state| state == test_case['status'] }
           tc.children.each do |child|
             n = child.name
-            # only capture the system out if there we are in the status of failure or error
+            # only capture system out if status of failure or error
             next unless n == 'system-out'
             tc.children.each do |c|
               if test_case['system_out']
