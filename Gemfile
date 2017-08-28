@@ -21,6 +21,7 @@ end
 
 group :development do
   gem 'bundler' # bundler rake tasks
+  gem 'rubocop', '~> 0.49.1', require: false # used in tests. pinned
   gem 'simplecov'
   #Documentation dependencies
   gem 'yard'                 ,'~> 0'
