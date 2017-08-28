@@ -1,18 +1,20 @@
+# frozen_string_literal: true
+
 require 'yard'
 require 'rubocop/rake_task'
 
-YARD_DIR = 'doc'
-DOCS_DIR = 'docs'
+YARD_DIR = 'doc'.freeze
+DOCS_DIR = 'docs'.freeze
 
 task :default do
-  sh %{rake -T}
+  sh %(rake -T)
 end
 
 namespace :gem do
   require 'bundler/gem_tasks'
 end
 
-task :yard => :'docs:yard'
+task yard: :'docs:yard'
 namespace :docs do
   # docs:yard task
   YARD::Rake::YardocTask.new
@@ -20,9 +22,9 @@ namespace :docs do
   desc 'Clean/remove the generated YARD Documentation cache'
   task :clean do
     original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
+    Dir.chdir(File.expand_path(File.dirname(__FILE__)))
     sh "rm -rf #{YARD_DIR}"
-    Dir.chdir( original_dir )
+    Dir.chdir(original_dir)
   end
 
   desc 'Tell me about YARD undocummented objects'
@@ -34,9 +36,9 @@ namespace :docs do
   # this calls `yard graph` so we can't use the yardoc tasks like above
   #   We could create a YARD:CLI:Graph object.
   #   But we still have to send the output to the graphviz processor, etc.  so... :meh:
-  task :arch => [:yard] do
+  task arch: [:yard] do
     original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
+    Dir.chdir(File.expand_path(File.dirname(__FILE__)))
     graph_processor = 'dot'
     if exe_exists?(graph_processor)
       FileUtils.mkdir_p(DOCS_DIR)
@@ -46,7 +48,7 @@ namespace :docs do
     else
       puts 'ERROR: you don\'t have dot/graphviz; punting'
     end
-    Dir.chdir( original_dir )
+    Dir.chdir(original_dir)
   end
 end
 
@@ -58,10 +60,10 @@ end
 def exe_exists?(name)
   exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
   ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-    exts.each { |ext|
+    exts.each do |ext|
       exe = File.join(path, "#{name}#{ext}")
       return true if File.executable?(exe) && !File.directory?(exe)
-    }
+    end
   end
-  return false
+  false
 end
