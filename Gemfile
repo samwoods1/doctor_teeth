@@ -15,19 +15,18 @@ def location_for(place, fake_version = nil)
   end
 end
 
-# unit tests: --without system_tests development
+# lint/unit tests: --without system_tests development
 gem 'rake'
 gem 'rspec'
+gem 'rubocop', '~> 0.49.1', require: false # used in tests. pinned
+# Documentation dependencies
+gem 'yard', '~> 0'
 
 group :system_tests do
 end
 
 group :development do
   gem 'bundler' # bundler rake tasks
-  gem 'rubocop', '~> 0.49.1', require: false # used in tests. pinned
-  # Documentation dependencies
-  gem 'markdown', '~> 0'
-  gem 'yard', '~> 0'
 end
 
 local_gemfile = "#{__FILE__}.local"
