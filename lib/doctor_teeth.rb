@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 # the whole shebang
 module DoctorTeeth
-
   require 'doctor_teeth/parser'
   require 'doctor_teeth/json_parser'
 
@@ -13,7 +14,7 @@ module DoctorTeeth
   # method stub for parsing json
   # @return test_run
   def self.parse_json_file(json)
-    #@todo: make file????
+    # @todo: make file????
     DoctorTeeth::NewLineJsonFileParser.new(json)
   end
 end
